@@ -31,3 +31,6 @@ Trialshopy is an e-commerce platform consisting of 5 main components:
 
 ## Update Rule
 After finishing any task (bug fix, new feature), **update this and the relevant brain files** with what changed.
+
+## Security Notes
+- **GitHub Push Protection Fix (2026-06-30)**: Removed all hardcoded secret fallbacks from source files. Affected: `loginAuth.service.ts`, `testOtp.controller.ts`, `database.config.ts`, `app.ts`, `download.contoller.ts`, `upload.middleware.ts` (customer backend) and `sellerAuth.controller.ts` (seller backend). All now use strict `process.env.VAR!` with no fallback. `.env.example` files added to both backends. Git history rewritten via `git commit --amend` (old hash: `4e2af26` → new: `3eba13e`). Force push required: `git push --force-with-lease origin main`.
