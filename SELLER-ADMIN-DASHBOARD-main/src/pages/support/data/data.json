@@ -1,0 +1,42 @@
+[
+    {
+      "id": 1,
+      "title": "I have received damaged return"
+    },
+    {
+        "id": 2,
+        "title": "Item/s are missing in my return"
+    },
+    {
+        "id": 3,
+        "title": "I have an issue with Exchange order"
+    },
+    {
+        "id": 4,
+        "title": "Return/RTO Delivery Issue - False Attempt by Logistic Partner"
+    },
+    {
+        "id": 5,
+        "title": "I am unable to raise Wrong Return / RTO claims"
+    },
+    {
+        "id": 6,
+        "title": "I have received damaged return"
+      },
+      {
+          "id": 7,
+          "title": "Item/s are missing in my return"
+      },
+      {
+          "id": 8,
+          "title": "I have an issue with Exchange order"
+      },
+      {
+          "id": 9,
+          "title": "Return/RTO Delivery Issue - False Attempt by Logistic Partner"
+      },
+      {
+          "id": 10,
+          "title": "I am unable to raise Wrong Return / RTO claims"
+      } 
+  ]

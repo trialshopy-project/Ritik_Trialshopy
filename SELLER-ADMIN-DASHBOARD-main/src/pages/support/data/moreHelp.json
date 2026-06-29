@@ -1,0 +1,34 @@
+[
+    {
+      "id": 1,
+      "title": "Cataloging & Pricing"
+    },
+    {
+        "id": 2,
+        "title": "Orders & Delivery"
+    },
+    {
+        "id": 3,
+        "title": "Payments"
+    },
+    {
+        "id": 4,
+        "title": "Inventory"
+    },
+    {
+        "id": 5,
+        "title": "Account"
+    },
+    {
+        "id": 6,
+        "title": "Advertisements"
+      },
+      {
+          "id": 7,
+          "title": "Instant Cash"
+      },
+      {
+          "id": 8,
+          "title": "Others"
+      }
+  ]

@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800&family=Play:wght@700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-Montserrat;
+  }
+  body {
+    background: #f1f1f1;
+  }
+  h1 {
+    @apply text-xl font-medium capitalize;
+  }
+}
+
+body .login-body {
+  @apply bg-customPurple;
+}
+.link {
+  @apply p-2.5 flex rounded-md gap-6 items-center md:cursor-pointer cursor-default duration-300 font-medium text-gray-300 no-underline;
+  color: #d1d5db !important;
+  text-decoration: none !important;
+}
+
+.link:hover {
+  color: #ffffff !important;
+}
+
+.active {
+  background-color: #F19305 !important;
+  color: #ffffff !important;
+  @apply rounded-md;
+}
+
+.mytable {
+  @apply py-2.5 px-2.5 text-sm text-left border-y border-gray-200;
+}
+
+th,
+td {
+  @apply py-[2.5px]  text-sm  border-y border-gray-200;
+}
+thead {
+  @apply bg-neutral-100;
+}
+th {
+  @apply font-semibold;
+}
+label {
+  /* @apply font-semibold; */
+}
+.input-field {
+  @apply block py-2.5 text-sm bg-transparent border-0 border-b-2 appearance-none dark:text-black dark:border-gray-900 focus:outline-none focus:ring-0;
+}
+.selected-item {
+  @apply bg-gray-700 text-white;
+  /* display: inline-flex; */
+  align-items: center;
+  border-radius: 4px;
+  padding: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.selected-item span {
+  /* margin-right: 0.5rem; */
+}
+
+.selected-item button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.opt-container {
+  @apply flex justify-between gap-2;
+}
