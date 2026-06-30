@@ -53,7 +53,9 @@ log = logging.getLogger("tryon_server")
 # ============================================================
 # Config
 # ============================================================
-PORT       = int(os.environ.get("TRYON_PORT", 8000))
+PORT       = int(os.environ.get("PORT", os.environ.get("TRYON_PORT", 8000)))
+HOST       = os.environ.get("HOST", "0.0.0.0" if os.environ.get("RENDER") else "127.0.0.1")
+BASE_URL   = os.environ.get("BASE_URL", f"http://127.0.0.1:{PORT}")
 HF_TOKEN   = os.getenv("HF_TOKEN", "") # Use token if provided for higher rate limits
 SPACE_ID = os.getenv("HF_SPACE_ID", "yisol/IDM-VTON")
 CLOTH_TYPE = os.environ.get("CLOTH_TYPE", "upper")       # upper | lower | overall
@@ -279,12 +281,10 @@ def process_tryon(job_id, person_url, garment_url):
 
         # Store success
         with jobs_lock:
-            jobs[job_id] = {
-                "status": "completed",
-                "result_file": result_copy_path,
-                "result_url": "http://127.0.0.1:{}/trial/result/{}".format(PORT, job_id),
-                "created_at": datetime.utcnow(),
-            }
+            jobs[job_id]["status"] = "completed"
+            jobs[job_id]["result_file"] = result_copy_path
+            jobs[job_id]["result_url"] = f"{BASE_URL}/trial/result/{job_id}"
+            jobs[job_id]["completed_at"] = datetime.utcnow().isoformat()
         log.info("[%s] Done. Result stored at %s", job_id, result_copy_path)
 
     except Exception as exc:
@@ -436,6 +436,5 @@ if __name__ == "__main__":
     log.info("TrialShopy Virtual Try-On Bridge Server")
     log.info("HF Space  : %s", SPACE_ID)
     log.info("Cloth type: %s", CLOTH_TYPE)
-    log.info("Listening : http://127.0.0.1:%d", PORT)
-    log.info("=" * 60)
-    app.run(host="127.0.0.1", port=PORT, debug=False, threaded=True)
+    log.info("Starting Virtual Try-On server on %s", BASE_URL)
+    app.run(host=HOST, port=PORT, debug=False, threaded=True)
