@@ -38,6 +38,7 @@ from datetime import datetime
 import requests
 from flask import Flask, request, jsonify, send_file
 from gradio_client import Client, handle_file
+from PIL import Image
 
 # ============================================================
 # Logging
@@ -53,9 +54,10 @@ log = logging.getLogger("tryon_server")
 # Config
 # ============================================================
 PORT       = int(os.environ.get("TRYON_PORT", 8000))
-HF_TOKEN   = os.environ.get("HF_TOKEN", None)            # optional
-SPACE_ID   = os.environ.get("CATVTON_SPACE", "zhengchong/CatVTON")
+HF_TOKEN   = os.getenv("HF_TOKEN", "") # Use token if provided for higher rate limits
+SPACE_ID = os.getenv("HF_SPACE_ID", "yisol/IDM-VTON")
 CLOTH_TYPE = os.environ.get("CLOTH_TYPE", "upper")       # upper | lower | overall
+MAX_RETRIES = 2     # upper | lower | overall
 RESULT_TTL = 300  # seconds - how long result files are kept (5 min)
 
 # ============================================================
@@ -88,11 +90,41 @@ def download_image_to_temp(url):
             ext = candidate
 
     tmp_path = os.path.join(TEMP_DIR, "input_" + uuid.uuid4().hex + ext)
-    resp = requests.get(url, timeout=30, stream=True)
-    resp.raise_for_status()
-    with open(tmp_path, "wb") as f:
-        for chunk in resp.iter_content(8192):
-            f.write(chunk)
+    
+    # Retry mechanism with increased timeout for slow Cloudinary connections
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            resp = requests.get(url, timeout=60, stream=True)
+            resp.raise_for_status()
+            with open(tmp_path, "wb") as f:
+                for chunk in resp.iter_content(8192):
+                    f.write(chunk)
+            break  # Success
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:
+                log.error("Failed to download %s after %d attempts: %s", url, max_retries, e)
+                raise
+            log.warning("Download attempt %d failed for %s. Retrying...", attempt + 1, url)
+            import time
+            time.sleep(2)
+            
+    # Force conversion to RGB to prevent 'cannot write mode RGBA as JPEG' 
+    # either in gradio_client preprocessing or on the HF remote space
+    from PIL import Image
+    try:
+        with Image.open(tmp_path) as img:
+            if img.mode != "RGB":
+                rgb_img = img.convert("RGB")
+                # Save it as a standard JPEG to ensure compatibility
+                jpeg_path = os.path.join(TEMP_DIR, "input_rgb_" + uuid.uuid4().hex + ".jpg")
+                rgb_img.save(jpeg_path, format="JPEG")
+                # Cleanup the raw downloaded file and use the new rgb one
+                cleanup_temp_file(tmp_path)
+                tmp_path = jpeg_path
+    except Exception as e:
+        log.warning("Failed to verify/convert image %s: %s", tmp_path, e)
+
     log.info("Downloaded %s -> %s", url[:80], tmp_path)
     return tmp_path
 
@@ -150,27 +182,33 @@ def process_tryon(job_id, person_url, garment_url):
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 log.info("[%s] Submitting to CatVTON (attempt %d/%d)...", job_id, attempt, MAX_RETRIES)
+                log.info("[%s] BEFORE client.submit()", job_id)
                 job = client.submit(
-                    person_image={
+                    dict={
                         "background": handle_file(person_path),
-                        "layers": [],      # no manual mask -> triggers AutoMasker
+                        "layers": [],
                         "composite": None,
                     },
-                    cloth_image=handle_file(garment_path),
-                    cloth_type=CLOTH_TYPE,
-                    num_inference_steps=50,
-                    guidance_scale=2.5,
+                    garm_img=handle_file(garment_path),
+                    garment_des="garment",
+                    is_checked=True,
+                    is_checked_crop=False,
+                    denoise_steps=30,
                     seed=42,
-                    show_type="result only",
-                    api_name="/submit_function",
+                    api_name="/tryon",
                 )
+                log.info("[%s] AFTER client.submit(), BEFORE job.result()", job_id)
                 # Wait up to 6 minutes for the job to complete
                 result = job.result(timeout=360)
+                log.info("[%s] AFTER job.result()", job_id)
                 log.info("[%s] Job completed on attempt %d", job_id, attempt)
                 break  # success
             except Exception as e:
                 last_error = e
                 log.warning("[%s] Attempt %d failed: %s", job_id, attempt, e)
+                log.error("[%s] Traceback for attempt %d:", job_id, attempt)
+                log.error(traceback.format_exc())
+                traceback.print_exc()
                 if attempt < MAX_RETRIES:
                     log.info("[%s] Retrying in 10s (HF Space may be waking up)...", job_id)
                     import time as _time
@@ -191,29 +229,53 @@ def process_tryon(job_id, person_url, garment_url):
         result_path = None
         if isinstance(result, str) and os.path.exists(result):
             result_path = result
-        elif isinstance(result, dict):
-            result_path = result.get("path") or result.get("url")
-        elif isinstance(result, (list, tuple)) and len(result) > 0:
-            first = result[0]
-            if isinstance(first, str) and os.path.exists(first):
-                result_path = first
-            elif isinstance(first, dict):
-                result_path = first.get("path") or first.get("url")
-
+        # Result from IDM-VTON is a tuple of (output_path, masked_image_output_path)
+        if isinstance(result, tuple) or isinstance(result, list):
+            result_path = result[0]
+        else:
+            result_path = result
+            
         if not result_path:
             raise ValueError("No output image found in result: " + str(result))
 
-        # Copy result to our managed temp dir so we can serve it
-        result_copy_path = os.path.join(TEMP_DIR, "result_" + job_id + ".jpg")
+        # Process and copy result to our managed temp dir
         if isinstance(result_path, str) and result_path.startswith("http"):
             # It is a URL - download it
-            resp = requests.get(result_path, timeout=30, stream=True)
-            resp.raise_for_status()
-            with open(result_copy_path, "wb") as f:
-                for chunk in resp.iter_content(8192):
-                    f.write(chunk)
+            raw_path = os.path.join(TEMP_DIR, "raw_" + job_id)
+            
+            for attempt in range(3):
+                try:
+                    resp = requests.get(result_path, timeout=60, stream=True)
+                    resp.raise_for_status()
+                    with open(raw_path, "wb") as f:
+                        for chunk in resp.iter_content(8192):
+                            f.write(chunk)
+                    break
+                except requests.exceptions.RequestException as e:
+                    if attempt == 2: raise
+                    import time; time.sleep(2)
+                    
+            img_to_process = raw_path
         else:
-            shutil.copy2(result_path, result_copy_path)
+            img_to_process = result_path
+
+        # Detect format and convert if necessary using Pillow
+        with Image.open(img_to_process) as img:
+            if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                result_ext = ".png"
+                save_format = "PNG"
+            else:
+                result_ext = ".jpg"
+                save_format = "JPEG"
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+
+            result_copy_path = os.path.join(TEMP_DIR, "result_" + job_id + result_ext)
+            img.save(result_copy_path, format=save_format)
+
+        # Cleanup raw path if we downloaded it
+        if img_to_process != result_path:
+            cleanup_temp_file(img_to_process)
 
         # Store success
         with jobs_lock:
@@ -357,7 +419,8 @@ def serve_result(job_id):
     if not result_file or not os.path.exists(result_file):
         return jsonify({"error": "Result file missing"}), 404
 
-    return send_file(result_file, mimetype="image/jpeg", as_attachment=False)
+    mimetype = "image/png" if result_file.lower().endswith(".png") else "image/jpeg"
+    return send_file(result_file, mimetype=mimetype, as_attachment=False)
 
 
 @app.route("/health", methods=["GET"])
