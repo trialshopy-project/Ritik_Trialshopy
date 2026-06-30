@@ -6,7 +6,7 @@ import { UserContext } from "@/lib/UserContext";
 import axios from "axios";
 import { Popup } from "../productCards/ProductCard";
 
-const SimilarProductCard = ({ productDetails }) => {
+const SimilarProductCard = ({ productDetails = {} }) => {
   const [showPopup, setShowPopup] = useState(false);
   const {
     _id,

@@ -36,7 +36,7 @@ const Modal = ({ isOpen, onClose, children }) => {
 export default function ProductDetails({ productData }) {
   const NextPrevimages = [
     productData?.productImage,
-    ...productData?.Images?.map((image) => image?.url),
+    ...(productData?.Images?.map((image) => image?.url) || []),
   ];
   const [authenticated] = useContext(UserContext);
   const [error, setError] = useState("");
@@ -60,7 +60,7 @@ export default function ProductDetails({ productData }) {
     useState(false);
   const [isProductAddedToLiveDemo, setIsProductAddedToLiveDemo] =
     useState(false);
-  const { discount, price } = productData;
+  const { discount, price } = productData || {};
   const inStock = productData?.Size
     ? productData?.Size[selectedSize]?.Inventory > 0
     : 0;
@@ -307,7 +307,7 @@ export default function ProductDetails({ productData }) {
                 </span>
               </div>
 
-              {productData?.related_product.length > 0 && (
+              {productData?.related_product?.length > 0 && (
                 <>
                   <div className="w-full h-px bg-gray-400"></div>
                   <div className="relative flex  text-base font-semibold lg:text-xl">
@@ -393,7 +393,7 @@ export default function ProductDetails({ productData }) {
                 )}
               </div>
 
-              {productData.attributes.map((attribute, index) => (
+              {productData?.attributes?.map((attribute, index) => (
                 <div
                   className="flex flex-row items-center justify-between w-full"
                   key={index}

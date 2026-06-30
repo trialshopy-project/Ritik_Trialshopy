@@ -20,14 +20,14 @@ export default function Info({ productData }) {
 				</p>
 			</div>
 
-			{productData.features.length > 0 && (
+			{productData?.features?.length > 0 && (
 				<div className="flex flex-col items-start w-full gap-6 py-4 lg:py-8">
 					<div className="w-full">
 						<h1 className="text-base font-semibold lg:text-xl">Features</h1>
 						<div className="w-full h-px bg-gradient-to-r from-gray-700 via-transparent to-white"></div>
 					</div>
 					<ul className="w-full text-base font-normal text-justify list-disc list-inside">
-						{productData.features.map((feature) => (
+						{productData?.features?.map((feature) => (
 							<li key={feature}>{feature}</li>
 						))}
 
@@ -35,7 +35,7 @@ export default function Info({ productData }) {
 				</div>
 			)}
 
-			{productData.specifications && (
+			{productData?.specifications && (
 				<div className="flex flex-col items-start w-full gap-6 py-4 lg:py-8">
 					<div className="w-full">
 						<h1 className="text-base font-semibold lg:text-xl">
@@ -44,7 +44,7 @@ export default function Info({ productData }) {
 						<div className="w-full h-px bg-gradient-to-r from-gray-700 via-transparent to-white"></div>
 					</div>
 					<div className="flex flex-col items-start justify-between gap-2.5 w-full text-sm">
-						{productData?.specifications.map((specification, index) => (
+						{productData?.specifications?.map((specification, index) => (
 							<div
 								key={index}
 								className="flex flex-col gap-2.5 w-full  md:w-1/3">
