@@ -42,14 +42,18 @@ const LoginwithPwd = () => {
       );
 
       if (response.data.success === true) {
-        const storeStatus = await axios.get(
-          `${import.meta.env.VITE_API_ENDPOINT}/api/v1/get-status/${response.data.seller.storeId}`
-        );
+        let storeStatusData = null;
+        if (response.data.seller.storeId) {
+          const storeStatus = await axios.get(
+            `${import.meta.env.VITE_API_ENDPOINT}/api/v1/get-status/${response.data.seller.storeId}`
+          );
+          storeStatusData = storeStatus?.data?.sellerStatus?.varification;
+        }
 
         setAuthenticated({
           user: response.data.seller,
           token: response.data.token,
-          storeStatus: storeStatus.data.sellerStatus.varification,
+          storeStatus: storeStatusData,
         });
         Cookies.set("tokenx", response.data.token);
         navigate("/dashboard");

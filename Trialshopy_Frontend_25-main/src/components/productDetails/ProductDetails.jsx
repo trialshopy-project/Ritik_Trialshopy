@@ -26,11 +26,12 @@ export const ProductDetails = (props) => {
         setProductData(res);
 
         const apiUrl3 = `${serverURL}/api/v1/products`;
-        const similarProductsResponse = await axios.post(apiUrl3, {
-          filters: { categories: res.category },
-        });
-
-        setSimilarProducts(similarProductsResponse.data.data);
+        if (res?.category) {
+          const similarProductsResponse = await axios.post(apiUrl3, {
+            filters: { categories: res.category },
+          });
+          setSimilarProducts(similarProductsResponse?.data?.data || []);
+        }
       } catch (error) {
         console.error("Error fetching product data:", error);
       } finally {
