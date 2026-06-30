@@ -175,7 +175,8 @@ def process_tryon(job_id, person_url, garment_url):
             "httpx_kwargs": {"timeout": 120},  # 2-min HTTP timeout per request
         }
         if HF_TOKEN:
-            client_kwargs["hf_token"] = HF_TOKEN
+            from huggingface_hub import login
+            login(token=HF_TOKEN)
 
         client = Client(**client_kwargs)
 
