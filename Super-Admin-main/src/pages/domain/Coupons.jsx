@@ -37,7 +37,7 @@ const Coupons = () => {
   const fetchCoupons = async () => {
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_USER_API_ENDPOINT || 'http://localhost:8000'}/api/v1/coupons/getAll`
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/api/v1/coupons/getAll`
       );
       if (response && response.data) {
         setData(response.data);
@@ -67,7 +67,7 @@ const Coupons = () => {
         }
       };
       const response = await axios.put(
-        `${import.meta.env.VITE_USER_API_ENDPOINT || 'http://localhost:8000'}/api/v1/coupons/updateCoupon/${selected._id}`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/api/v1/coupons/updateCoupon/${selected._id}`,
         payload
       );
       if (response) {
@@ -100,7 +100,7 @@ const Coupons = () => {
         }
       };
       const response = await axios.post(
-        `${import.meta.env.VITE_USER_API_ENDPOINT || 'http://localhost:8000'}/api/v1/coupons/createCoupon`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/api/v1/coupons/createCoupon`,
         payload
       );
       if (response) {
@@ -133,7 +133,7 @@ const Coupons = () => {
   const handledelete = async (id) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_USER_API_ENDPOINT || 'http://localhost:8000'}/api/v1/coupons/deleteCoupon/${id}`,
+        `${import.meta.env.VITE_USER_API_ENDPOINT}/api/v1/coupons/deleteCoupon/${id}`,
       );
       if (response) {
         toast.success("Coupon deleted successfully");

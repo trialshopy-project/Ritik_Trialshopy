@@ -3,7 +3,7 @@ import axios from 'axios';
 const fetchData = async (id) => {
 	try {
 		const response = await axios.post(
-			'https://trialshopy-backend.onrender.com/api/v1/categories',
+			`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/categories`,
 			{
 				filters: { parent: id },
 			}

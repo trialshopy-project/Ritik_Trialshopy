@@ -97,7 +97,7 @@ const FilterMenuLayout = ({
                 </p>
               </div>
             </div>
-            <Link target="_blank" href={process.env.NEXT_PUBLIC_SELLER_URL || "http://localhost:5174"}>
+            <Link target="_blank" href={process.env.NEXT_PUBLIC_SELLER_URL}>
               <button className="bg-[#EB8105] text-white px-4 py-1 rounded">
                 Add Business
               </button>

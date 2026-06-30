@@ -12,7 +12,7 @@ export default function ProductGrid({ cards, title, setInitialProduct = 0 }) {
 		const fetchProducts = async () => {
 			try {
 				const response = await axios.post(
-					'https://trialshopy-backend-q24e.onrender.com/api/v1/products/',
+					`${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/products/`,
 					{
 						filters: {
 							categories: [cards],

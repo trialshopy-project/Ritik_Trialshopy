@@ -130,7 +130,7 @@ const Page = () => {
         throw new Error("No clothing image selected. Please go back and select a product first.");
       }
 
-      const backendApiUrl = process.env.NEXT_PUBLIC_BASE_API_URL || "http://localhost:7000";
+      const backendApiUrl = process.env.NEXT_PUBLIC_BASE_API_URL;
 
       // ── Step 1: Upload person image to Cloudinary ────────────────────────
       let personImageUrl = imageData;

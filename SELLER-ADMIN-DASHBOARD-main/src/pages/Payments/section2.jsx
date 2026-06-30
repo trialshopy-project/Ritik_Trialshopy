@@ -17,7 +17,7 @@ function Section2() {
   const sellerId=authenticated?.user?._id;
   // const router=Router()
   const navigate=useNavigate()
-  const socket=io('http://localhost:8000')//to be updated with real time server id 
+  const socket=io(import.meta.env.VITE_TRIALSHOPY_API_URL)//to be updated with real time server id 
   //fetching on every update
   // useEffect(
   //   ()=>{
