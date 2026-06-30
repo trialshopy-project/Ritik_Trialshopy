@@ -4,9 +4,14 @@ import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
 // ── Try-On API base URL ────────────────────────────────────────────────────
-// Set VIRTUAL_TRYON_API in your environment to point to the deployed server.
-// Localhost is used as the fallback so local dev works without any .env changes.
-const TRYON_API = (process.env.VIRTUAL_TRYON_API || "http://127.0.0.1:8000").replace(/\/$/, "");
+// Priority:
+//   1. VIRTUAL_TRYON_API env var (explicitly set by operator)
+//   2. Auto-detect Render production (RENDER env var is set by Render automatically)
+//   3. Localhost fallback for local development
+const DEFAULT_TRYON_API = process.env.RENDER
+  ? "https://trialshopy-tryon.onrender.com"   // auto production URL on Render
+  : "http://127.0.0.1:8000";                  // local dev fallback
+const TRYON_API = (process.env.VIRTUAL_TRYON_API || DEFAULT_TRYON_API).replace(/\/$/, "");
 const IS_LOCAL_TRYON = TRYON_API.includes("127.0.0.1") || TRYON_API.includes("localhost");
 
 
