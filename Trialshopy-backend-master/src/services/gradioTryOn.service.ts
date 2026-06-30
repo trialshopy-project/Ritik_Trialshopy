@@ -3,6 +3,11 @@ import { v2 as cloudinary } from "cloudinary";
 import { randomUUID } from "crypto";
 import { Readable } from "stream";
 
+// ── Try-On API base URL ────────────────────────────────────────────────────
+// Set VIRTUAL_TRYON_API in your environment to point to the deployed server.
+// Localhost is used as the fallback so local dev works without any .env changes.
+const TRYON_API = (process.env.VIRTUAL_TRYON_API || "http://127.0.0.1:8000").replace(/\/$/, "");
+const IS_LOCAL_TRYON = TRYON_API.includes("127.0.0.1") || TRYON_API.includes("localhost");
 
 
 /**
@@ -46,16 +51,16 @@ export class GradioTryOnService {
     garmentImageUrl: string,
     onStatus?: (status: GradioQueueStatus) => void
   ): Promise<GradioTryOnResult> {
-    const baseUrl = (process.env.VIRTUAL_TRYON_API || "http://127.0.0.1:8000").replace(/\/$/, "");
+    const baseUrl = TRYON_API;
 
     // ── Step 0: Health-check — make sure the bridge server is reachable ───────
     try {
-      await axios.get(`${baseUrl}/health`, { timeout: 5_000 });
+      await axios.get(`${baseUrl}/health`, { timeout: IS_LOCAL_TRYON ? 5_000 : 15_000 });
     } catch {
-      throw new Error(
-        "The Virtual Try-On bridge server is not running. " +
-        "Please start it by double-clicking start_tryon.bat and try again."
-      );
+      const hint = IS_LOCAL_TRYON
+        ? "Please start the local server by double-clicking start_tryon.bat and try again."
+        : `Please ensure the Try-On service is deployed and running at ${baseUrl}.`;
+      throw new Error(`The Virtual Try-On server is not reachable. ${hint}`);
     }
 
     // ── Step 1: Upload person image to Cloudinary if needed ──────────────────
