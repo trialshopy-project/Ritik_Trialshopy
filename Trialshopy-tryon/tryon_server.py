@@ -162,6 +162,11 @@ def process_tryon(job_id, person_url, garment_url):
         person_path  = download_image_to_temp(person_url)
         garment_path = download_image_to_temp(garment_url)
 
+        # Capture original person image resolution to restore it later
+        from PIL import Image
+        with Image.open(person_path) as orig:
+            orig_size = orig.size
+
         # Connect to CatVTON HF Space
         # Use a long httpx timeout so the connection itself doesn't drop
         log.info("[%s] Connecting to HF Space: %s", job_id, SPACE_ID)
@@ -263,6 +268,11 @@ def process_tryon(job_id, person_url, garment_url):
 
         # Detect format and convert if necessary using Pillow
         with Image.open(img_to_process) as img:
+            # Restore original image resolution
+            if img.size != orig_size:
+                # Use LANCZOS for high-quality resizing
+                img = img.resize(orig_size, Image.Resampling.LANCZOS)
+
             if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
                 result_ext = ".png"
                 save_format = "PNG"
