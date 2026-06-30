@@ -76,6 +76,11 @@ const Page = () => {
     canvas.height = video.videoHeight;
     
     const context = canvas.getContext("2d");
+    
+    // Flip the canvas horizontally so it doesn't save as a backwards mirror-selfie
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
+    
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const capturedImage = canvas.toDataURL("image/jpeg");
     setImageData(capturedImage);
@@ -291,6 +296,7 @@ const Page = () => {
             <video 
               ref={videoRef} 
               className="w-full h-auto max-h-[500px] object-cover mx-auto"
+              style={{ transform: "scaleX(-1)" }}
               playsInline
               muted
             />
