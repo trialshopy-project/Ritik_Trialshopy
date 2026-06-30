@@ -79,6 +79,8 @@ export const io = new Server(server, {
       "http://localhost:5174",
       "http://localhost:5173",
       "http://localhost:7002",
+      "https://ritik-trialshopy.vercel.app",
+      
       process.env.Frontend_Endpoint,
     ],
     methods: ["GET", "POST"],
@@ -109,11 +111,13 @@ app.use(
       "https://admin.trialshopy.com",
       "https://www.admin.trialshopy.com",
       "https://trialshopy.com",
+      "https://ritik-trialshopy.vercel.app",
       "http://13.202.102.83:5173",
       "http://localhost:5174",
       "http://localhost:3000",
       "http://localhost:5173",
       "http://localhost:7002",
+     
       process.env.Frontend_Endpoint,
     ],
     credentials: true,
