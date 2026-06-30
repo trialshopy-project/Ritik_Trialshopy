@@ -43,6 +43,10 @@ appInstance
           "http://13.202.102.83:5173",
           "http://localhost:5174",
           "http://localhost:5173",
+          "http://localhost:7002",
+          "https://ritik-trialshopy.vercel.app",
+          "https://ritik-trialshopy-wgzz.vercel.app",
+          "https://ritik-trialshopy-4xoa.vercel.app",
           "http://localhost:7001",
           "http://localhost:7000",
           process.env.Frontend_Endpoint

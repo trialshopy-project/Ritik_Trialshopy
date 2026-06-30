@@ -80,6 +80,8 @@ export const io = new Server(server, {
       "http://localhost:5173",
       "http://localhost:7002",
       "https://ritik-trialshopy.vercel.app",
+      "https://ritik-trialshopy-wgzz.vercel.app",
+      "https://ritik-trialshopy-4xoa.vercel.app",
       
       process.env.Frontend_Endpoint,
     ],
@@ -117,7 +119,9 @@ app.use(
       "http://localhost:3000",
       "http://localhost:5173",
       "http://localhost:7002",
-     
+      "https://ritik-trialshopy.vercel.app",
+      "https://ritik-trialshopy-wgzz.vercel.app",
+      "https://ritik-trialshopy-4xoa.vercel.app",
       process.env.Frontend_Endpoint,
     ],
     credentials: true,

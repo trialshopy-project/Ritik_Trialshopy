@@ -29,6 +29,9 @@ const allowedOrigins = [
   "http://localhost:7001",
   "http://localhost:7002",
   "http://localhost:5000",
+  "https://ritik-trialshopy.vercel.app",
+  "https://ritik-trialshopy-wgzz.vercel.app",
+  "https://ritik-trialshopy-4xoa.vercel.app",
 ];
 
 export class App {

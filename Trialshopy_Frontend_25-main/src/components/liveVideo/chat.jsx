@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import io from "socket.io-client";
 
-const socket = io("process.env.NEXT_PUBLIC_BASE_API_URL_SELLER");
+const socket = io(process.env.NEXT_PUBLIC_BASE_API_URL_SELLER);
 
 const Chat = ({ chatId, userId }) => {
   const [messages, setMessages] = useState([]);
