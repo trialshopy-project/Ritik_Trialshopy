@@ -17,36 +17,28 @@ export const ProductDetails = (props) => {
   const serverURL = process.env.NEXT_PUBLIC_BASE_API_URL;
   useEffect(() => {
     const fetchProductData = async () => {
-  setLoading(true);
-  const apiUrl = `${serverURL}/api/v1/products/${productId}`;
+      setLoading(true);
+      const apiUrl = `${serverURL}/api/v1/products/${productId}`;
 
-  try {
-    console.log("API URL:", apiUrl);
+      try {
+        const response = await fetch(apiUrl, { method: "GET" });
+        const res = await response.json();
+        setProductData(res);
 
-    const response = await fetch(apiUrl, { method: "GET" });
+        const apiUrl3 = `${serverURL}/api/v1/products`;
+        if (res?.category) {
+          const similarProductsResponse = await axios.post(apiUrl3, {
+            filters: { categories: res.category },
+          });
+          setSimilarProducts(similarProductsResponse?.data?.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching product data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    console.log("Status:", response.status);
-
-    const res = await response.json();
-
-    console.log("Response:", res);
-
-    setProductData(res);
-
-    const apiUrl3 = `${serverURL}/api/v1/products`;
-
-    if (res?.category) {
-      const similarProductsResponse = await axios.post(apiUrl3, {
-        filters: { categories: res.category },
-      });
-      setSimilarProducts(similarProductsResponse?.data?.data || []);
-    }
-  } catch (error) {
-    console.error("Error fetching product data:", error);
-  } finally {
-    setLoading(false);
-  }
-};
     const fetchProductReviews = async () => {
       const apiUrl2 = `${serverURL}/api/v1/reviews/${productId}`;
 

@@ -275,7 +275,7 @@ const ExploreByCategories = () => {
                   </p>
                 </div>
               </div>
-              <Link target="_blank" href={process.env.NEXT_PUBLIC_SELLER_URL}>
+              <Link target="_blank" href={process.env.NEXT_PUBLIC_SELLER_URL || "#"}>
                 <button className="bg-black text-white px-4 py-1 rounded">
                   Add Business
                 </button>

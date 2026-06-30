@@ -251,7 +251,7 @@ const Footer = () => {
                 Business Support
               </Link>
               <a
-                href={process.env.NEXT_PUBLIC_SELLER_URL}
+                href={process.env.NEXT_PUBLIC_SELLER_URL || "#"}
                 className="px-2 py-1 my-3 rounded-lg bg-gradient-to-b from-primary to-secondary"
               >
                 Become A Seller
