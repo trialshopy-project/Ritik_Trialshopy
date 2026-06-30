@@ -176,7 +176,13 @@ def process_tryon(job_id, person_url, garment_url):
         }
         if HF_TOKEN:
             from huggingface_hub import login
-            login(token=HF_TOKEN)
+            try:
+                login(token=HF_TOKEN)
+            except Exception as e:
+                log.warning("[%s] Failed to login to Hugging Face with provided token: %s", job_id, e)
+                # Unset token so gradio_client doesn't crash trying to use it automatically
+                if "HF_TOKEN" in os.environ:
+                    del os.environ["HF_TOKEN"]
 
         client = Client(**client_kwargs)
 
