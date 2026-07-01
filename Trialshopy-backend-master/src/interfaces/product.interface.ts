@@ -13,6 +13,7 @@ export interface IProduct extends Document {
   gstId: string;
   storeId?: string;
   status: statusType;
+  categories?: string[];
   category?: string[];
   subcategory?: string[];
   productName: string;
@@ -40,6 +41,7 @@ export interface IProduct extends Document {
 
 export interface IProductUpdate extends Document {
   status?: statusType;
+  categories?: string[];
   category?: string[];
   subcategory?: string[];
   productName?: string;
