@@ -250,127 +250,143 @@ const Paymentpage = () => {
         </div>
       </div>
 
-      <div className="px-3 md:px-[120px] xl:mx-[200px] mt-[10px] flex flex-col md:flex-row overflow-hidden">
-        <div className="w-full">
-          <div className="relative ">
-            <div className="flex">
-              <div className="flex mt-[20px]">
-                <div className="">
-                  <div className="flex gap-1">
-                    <h4 className="font-thin">Deliver to: </h4>
-                    <h4 className="font-light">{address?.fullName}</h4>
-                  </div>
-                  <div className="mt-1 font-thin">
-                    <p>
-                      {address
-                        ? `${address.landmark ? address.landmark + ', ' : ''}${address.addressLine}, ${address.city}, ${address.state}, ${address.pincode}, ${address.country}`
-                        : ""}
-                    </p>
-                    <p>Contact : {address ? `${address.PhoneNumber}` : ""}</p>
-                  </div>
-                </div>
-              </div>
+      <div className="px-3 md:px-[120px] xl:mx-[200px] mt-[10px] flex flex-col lg:flex-row gap-6 overflow-hidden pb-10">
+        {/* ── Left column: address + payment method ─────────────────── */}
+        <div className="w-full lg:w-3/5 flex flex-col gap-5">
+          {/* Delivery address */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-[15px] text-gray-800">
+                Delivery Address
+              </h3>
+              <Link
+                href="/checkout"
+                className="text-[13px] font-medium text-[#EB8105] hover:underline"
+              >
+                Change
+              </Link>
             </div>
-          </div>
-          <h3 className="font-normal text-[#7C7C7C] text-[13px] ml-[10px] mt-[15px]">
-            Prices Detail({cartItems.length} item)
-          </h3>
-
-
-          <div className="flex justify-between my-5">
-            <div className="flex flex-col items-start justify-start ml-[10px] gap-3">
-              <h3 className="font-poppins font-thin text-[14px]">
-                TOTAL MRP
-              </h3>
-              <h3 className="font-poppins font-thin text-[14px]">
-                Discount on MRP
-              </h3>
-              <h3 className="font-poppins font-thin text-[14px]">
-                Coupon Discount
-              </h3>
-              <h3 className="font-poppins font-thin text-[14px]">
-                Total Discount
-              </h3>
-
-              <div className="flex">
-                <h3 className="font-poppins font-thin text-[14px]">
-                  Convivence Fee
-                </h3>
-                <h3 className="font-poppins text-[#EB8105] font-normal pt-[1.5px] text-[13px] ml-[4px] cursor-pointer">
-                  Know More
-                </h3>
-              </div>
-            </div>
-            <div className="flex flex-col mr-[20px] items-end justify-end gap-3">
-              <h3 className="font-poppins font-normal text-[14px]">
-                ₹{" "}
-                {totalMRPPrice}
-              </h3>
-              <h3 className="font-poppins font-normal text-[14px] text-[#059669]">
-                -₹{" "}
-                {totalDiscount}
-              </h3>
-              <h3 className="font-poppins font-normal text-[14px] text-[#DC2626] cursor-pointer">
-                -{totalCouponDiscount}₹
-              </h3>
-              <h3 className="font-poppins font-normal text-[14px] text-[#DC2626] cursor-pointer">
-                - {totalDiscountPercentage}%
-              </h3>
-
-              <h3 className="font-poppins font-normal text-[14px]">
-                Free
-              </h3>
-            </div>
+            <p className="font-medium text-gray-800">{address?.fullName}</p>
+            <p className="text-[14px] text-[#7C7C7C] mt-1 leading-relaxed">
+              {address
+                ? `${address.landmark ? address.landmark + ", " : ""}${address.addressLine}, ${address.city}, ${address.state}, ${address.pincode}, ${address.country}`
+                : ""}
+            </p>
+            <p className="text-[14px] text-[#7C7C7C] mt-1">
+              Contact: {address ? `${address.PhoneNumber}` : ""}
+            </p>
           </div>
 
-          <hr className="mt-[20px]" />
-
-          <div className="flex justify-between my-5">
-            <div className="flex flex-col items-start justify-start ml-[10px] gap-3">
-              <h3 className="font-normal">Total Amount</h3>
-            </div>
-            <div className="flex font-normal flex-col mr-[20px] items-end justify-end gap-3">
-              <h3>₹ {subtotal}</h3>
-            </div>
-          </div>
-
-          <div className="my-5 ml-[10px]">
-            <h3 className="font-semibold mb-3">Select Payment Method</h3>
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2 cursor-pointer">
+          {/* Payment method */}
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
+            <h3 className="font-semibold text-[15px] text-gray-800 mb-4">
+              Select Payment Method
+            </h3>
+            <div className="flex flex-col gap-3">
+              <label
+                className={`flex items-center gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${
+                  paymentMethod === "Online"
+                    ? "border-[#EB8105] bg-orange-50"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="Online"
                   checked={paymentMethod === "Online"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="accent-customPurple w-4 h-4"
+                  className="accent-[#EB8105] w-4 h-4"
                 />
-                <span className="text-gray-700">Online Payment (UPI, Cards, NetBanking)</span>
+                <span className="text-gray-700 text-[14px]">
+                  Online Payment{" "}
+                  <span className="text-[#7C7C7C] text-[13px]">
+                    (UPI, Cards, NetBanking)
+                  </span>
+                </span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label
+                className={`flex items-center gap-3 cursor-pointer rounded-lg border p-3 transition-colors ${
+                  paymentMethod === "COD"
+                    ? "border-[#EB8105] bg-orange-50"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
                 <input
                   type="radio"
                   name="paymentMethod"
                   value="COD"
                   checked={paymentMethod === "COD"}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="accent-customPurple w-4 h-4"
+                  className="accent-[#EB8105] w-4 h-4"
                 />
-                <span className="text-gray-700">Cash on Delivery (COD)</span>
+                <span className="text-gray-700 text-[14px]">Cash on Delivery (COD)</span>
               </label>
             </div>
           </div>
+        </div>
 
-          <button
-            className="w-full px-3 py-2 my-5 text-center rounded bg-gradient-to-b from-primary to-secondary"
-            onClick={() => handleOpenRazorpay(subtotal.toFixed(2))}
-          >
-            {paymentMethod === "COD" ? "Place Order" : "Pay Now"}
-          </button>
-          <Link href="/checkout/confirmation"></Link>
+        {/* ── Right column: price summary ───────────────────────────── */}
+        <div className="w-full lg:w-2/5">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 lg:sticky lg:top-4">
+            <h3 className="font-semibold text-[15px] text-gray-800 border-b border-gray-100 pb-3 mb-4">
+              Price Details{" "}
+              <span className="text-[#7C7C7C] font-normal text-[13px]">
+                ({cartItems.length} item)
+              </span>
+            </h3>
 
-          <hr className="mt-[20px]" />
+            <div className="flex flex-col gap-3 text-[14px]">
+              <div className="flex justify-between">
+                <span className="text-[#7C7C7C]">Total MRP</span>
+                <span className="text-gray-800">₹ {totalMRPPrice}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7C7C7C]">Discount on MRP</span>
+                <span className="text-[#059669]">-₹ {totalDiscount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7C7C7C]">Coupon Discount</span>
+                <span className="text-[#DC2626]">-₹ {totalCouponDiscount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7C7C7C]">Total Discount</span>
+                <span className="text-[#DC2626]">- {totalDiscountPercentage}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#7C7C7C] flex items-center gap-1">
+                  Convenience Fee
+                  <span className="text-[#EB8105] text-[12px] cursor-pointer">
+                    Know More
+                  </span>
+                </span>
+                <span className="text-[#059669]">Free</span>
+              </div>
+            </div>
+
+            <div className="border-t border-dashed border-gray-200 my-4" />
+
+            <div className="flex justify-between items-center mb-5">
+              <span className="font-semibold text-[16px] text-gray-800">
+                Total Amount
+              </span>
+              <span className="font-semibold text-[18px] text-gray-900">
+                ₹ {subtotal}
+              </span>
+            </div>
+
+            <button
+              className="w-full px-3 py-3 text-center text-white font-semibold rounded-md bg-gradient-to-b from-primary to-secondary hover:opacity-95 transition-opacity"
+              onClick={() => handleOpenRazorpay(subtotal.toFixed(2))}
+            >
+              {paymentMethod === "COD" ? "Place Order" : `Pay Now · ₹ ${subtotal}`}
+            </button>
+
+            <p className="text-center text-[12px] text-[#7C7C7C] mt-3">
+              Safe and secure payments. 100% authentic products.
+            </p>
+            <Link href="/checkout/confirmation"></Link>
+          </div>
         </div>
       </div>
     </>

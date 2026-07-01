@@ -30,3 +30,12 @@ coverage/
 # OS
 .DS_Store
 Thumbs.db
+
+AGENTS.md
+
+CHANGES_README.md
+start.bat
+test_tryon.bat
+test_rgba.png
+
+brain/

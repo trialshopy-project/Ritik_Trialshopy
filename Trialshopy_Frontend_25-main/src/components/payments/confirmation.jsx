@@ -36,87 +36,99 @@ const Confirmation = ({ data }) => {
         </div>
       </div>
       {/* Confirmation Card */}
-      <div className="w-full sm:w-[700px] bg-white shadow-lg p-6 rounded-lg">
-        <div className="text-center">
-          <Image
-            height={80}
-            width={80}
-            alt="confirm"
-            src="/images/VectorC.svg"
-            className="mx-auto"
-          />
-          <Image
-            height={150}
-            width={150}
-            alt="Order Confirmed"
-            src="/images/OrderConfirmed.svg"
-            className="mx-auto mt-4"
-          />
-          <p className="mt-4 text-sm sm:text-lg">
-            Your order #{data?._id} was placed successfully. You can check the
-            status of your order anytime.
+      <div className="w-full sm:w-[700px] bg-white shadow-lg p-6 sm:p-8 rounded-xl border border-gray-100">
+        {/* Success header */}
+        <div className="text-center flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <svg
+              className="w-9 h-9 text-green-600"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="mt-4 text-xl sm:text-2xl font-bold text-gray-800">
+            Order Confirmed!
+          </h2>
+          <p className="mt-2 text-sm sm:text-base text-[#7C7C7C] max-w-md">
+            Thank you for shopping with us. Your order was placed successfully — you
+            can track its status anytime from your account.
           </p>
         </div>
 
-        {/* Order Details */}
-        <div className="mt-6">
-          <h3 className="text-xs sm:text-lg font-semibold">
-            Order No: {data?._id}
-          </h3>
-          <h3 className="text-xs sm:text-lg mt-2">
-            Shipping to:{" "}
-            {`${data?.shippingAddress?.addressLine || ""}, ${
-              data?.shippingAddress?.city || ""
-            }, ${data?.shippingAddress?.state || ""}, ${
-              data?.shippingAddress?.pincode || ""
-            }`.replace(/,\s*$/, "")}
-          </h3>
-          <div className="mt-4 flex items-center text-sm sm:text-lg">
-            <Image
-              height={20}
-              width={20}
-              alt="tick"
-              src="/images/VectorTick.svg"
-              className="w-4 h-4"
-            />
-            <span className="ml-2">Delivery by:</span>
-            <span className="font-bold ml-2">{futureDate.toDateString()}</span>
+        {/* Order summary strip */}
+        <div className="mt-6 rounded-lg bg-[#FAFAFA] border border-gray-100 p-4 flex flex-col gap-3">
+          <div className="flex justify-between items-center gap-3">
+            <span className="text-[13px] text-[#7C7C7C]">Order No.</span>
+            <span className="text-[13px] sm:text-sm font-semibold text-gray-800 text-right break-all">
+              #{data?._id}
+            </span>
+          </div>
+          <div className="flex justify-between items-start gap-3">
+            <span className="text-[13px] text-[#7C7C7C] whitespace-nowrap">
+              Shipping to
+            </span>
+            <span className="text-[13px] sm:text-sm text-gray-700 text-right">
+              {`${data?.shippingAddress?.addressLine || ""}, ${
+                data?.shippingAddress?.city || ""
+              }, ${data?.shippingAddress?.state || ""}, ${
+                data?.shippingAddress?.pincode || ""
+              }`.replace(/,\s*$/, "")}
+            </span>
+          </div>
+          <div className="flex justify-between items-center gap-3 border-t border-dashed border-gray-200 pt-3">
+            <span className="text-[13px] text-[#7C7C7C]">Delivery by</span>
+            <span className="text-[13px] sm:text-sm font-semibold text-green-700">
+              {futureDate.toDateString()}
+            </span>
           </div>
         </div>
+
+        {/* Products */}
+        <div className="mt-6">
+          <h3 className="text-sm font-semibold text-gray-800 mb-3">
+            Items in this order
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {data?.products?.map((item, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 border border-gray-100 rounded-lg p-2"
+              >
+                <Image
+                  height={96}
+                  width={96}
+                  alt="Product"
+                  className="h-24 w-24 object-cover rounded-md flex-shrink-0"
+                  src={item?.productId?.productImage || "/images/Rectangle.jpg"}
+                />
+                <div className="min-w-0">
+                  <h2 className="text-sm font-medium text-gray-800 line-clamp-2">
+                    {item?.productId?.productName}
+                  </h2>
+                  <p className="text-xs text-[#7C7C7C] mt-1">Size: {item?.size}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Buttons */}
-        <div className="gap-[5px] flex flex-row">
-          <Link href="/categories">
-            <div className="mx-2 sm:w-[300px]  h-[40px] border border-primary text-primary w-full px-3 py-2 rounded text-center my-5">
+        <div className="gap-3 flex flex-col sm:flex-row mt-7">
+          <Link href="/products" className="flex-1">
+            <div className="h-[44px] border border-primary text-primary font-semibold w-full px-3 py-2 rounded-md text-center flex items-center justify-center hover:bg-orange-50 transition-colors">
               Continue Shopping
             </div>
           </Link>
-          <Link href="/account/orders">
-            <div className="mx-2 sm:w-[300px] h-[40px] bg-gradient-to-b from-primary to-secondary w-full px-3 py-2 rounded text-center my-5">
+          <Link href="/account/orders" className="flex-1">
+            <div className="h-[44px] bg-gradient-to-b from-primary to-secondary text-white font-semibold w-full px-3 py-2 rounded-md text-center flex items-center justify-center hover:opacity-95 transition-opacity">
               Track Order
             </div>
           </Link>
-        </div>
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 overflow-hidden">
-          {data?.products?.map((item, index) => (
-            <div key={index} className="flex items-start">
-              <Image
-                height={128}
-                width={128}
-                alt="Product"
-                className="h-32 w-32 object-cover rounded-md shadow"
-                src={item?.productId?.productImage || "/images/Rectangle.jpg"}
-              />
-              <div className="ml-4">
-                <h2 className="text-sm sm:text-lg font-medium line-clamp-3">
-                  {item?.productId?.productName}
-                </h2>
-                <p className="text-xs sm:text-base text-gray-500 mt-1">
-                  {item?.size}
-                </p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

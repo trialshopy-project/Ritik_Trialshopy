@@ -176,10 +176,11 @@ const SimilarProductCard = ({ productDetails = {} }) => {
           </ul>
         </div>
 
-        <Link href={`/products/details?productId=${productDetails._id}`}>
-          <button className="flex items-center justify-center gap-2 w-[270px]  py-1 lg:py-2 px-4 lg:px-6  border border-gray-400 bg-gray-50 rounded-sm hover:bg-black hover:text-white">
-            <p className="font-semibold">View Details</p>
-          </button>
+        <Link
+          href={`/products/details?productId=${productDetails._id}`}
+          className="flex items-center justify-center gap-2 w-[270px] py-1 lg:py-2 px-4 lg:px-6 border border-gray-400 bg-gray-50 rounded-sm hover:bg-black hover:text-white font-semibold text-sm"
+        >
+          View Details
         </Link>
 
         <div className="flex flex-col  items-start lg:flex-row lg:items-center justify-between text-xs w-[270px] ">

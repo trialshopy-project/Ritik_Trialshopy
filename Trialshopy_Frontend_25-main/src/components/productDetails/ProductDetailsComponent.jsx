@@ -74,11 +74,10 @@ export default function ProductDetails({ productData }) {
         : 0 * discount) /
         100;
 
-  const discountPercentage = Math.round(
-    ((discountedPrice - productData?.Size[selectedSize]?.MRP) /
-      productData?.Size[selectedSize]?.MRP) *
-      100
-  );
+  const currentMRP = productData?.Size?.[selectedSize]?.MRP || 0;
+  const discountPercentage = currentMRP
+    ? Math.round(((currentMRP - discountedPrice) / currentMRP) * 100)
+    : 0;
 
   const addToLiveDemo = async () => {
     try {
@@ -206,6 +205,21 @@ export default function ProductDetails({ productData }) {
   }, [productData]);
   return (
     <div className="px-4 lg:px-[120px] relative w-full">
+      {/* Breadcrumb */}
+      <nav className="flex flex-wrap items-center gap-1 pt-4 text-[13px] text-[#7C7C7C]">
+        <Link href="/" className="hover:text-[#EB8105]">
+          Home
+        </Link>
+        <span>/</span>
+        <Link href="/products" className="hover:text-[#EB8105]">
+          Products
+        </Link>
+        <span>/</span>
+        <span className="text-gray-800 font-medium line-clamp-1 max-w-[60vw]">
+          {productData?.productName}
+        </span>
+      </nav>
+
       <div className="w-full mx-auto py-4 lg:py-8 bg-white grid sm:flex grid-cols-1 md:grid-cols-2 gap-[30px]">
         <div className="flex flex-col gap-2.5 items-center w-full sm:w-2/3">
           <div className="relative w-full">
@@ -234,6 +248,8 @@ export default function ProductDetails({ productData }) {
                 alt={`${productData?.productName}`}
                 className="w-full h-[492px]"
                 style={zoomStyle}
+                priority
+                sizes="(max-width: 768px) 100vw, 40vw"
               />
             </div>
 
@@ -306,6 +322,9 @@ export default function ProductDetails({ productData }) {
                   {discountPercentage}% off
                 </span>
               </div>
+              <p className="text-xs text-[#7C7C7C] -mt-3">
+                Inclusive of all taxes
+              </p>
 
               {productData?.related_product?.length > 0 && (
                 <>
@@ -475,6 +494,46 @@ export default function ProductDetails({ productData }) {
             )}
             
             <p className="text-red-500 text-sm">{error}</p>
+
+            {/* Trust badges — standard e-commerce reassurance strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full mt-3 pt-4 border-t border-gray-200">
+              {[
+                {
+                  label: "Free Delivery",
+                  d: "M3 13h13v-2H3v2zm0 4h10v-2H3v2zm14-8h3l1 3v5h-2a2 2 0 11-4 0h-2V6h3v3zM6 19a2 2 0 100-4 2 2 0 000 4z",
+                },
+                {
+                  label: "7-Day Return",
+                  d: "M12 5V2L8 6l4 4V7a5 5 0 11-5 5H5a7 7 0 107-7z",
+                },
+                {
+                  label: "Secure Payment",
+                  d: "M12 2l7 4v6c0 5-3.4 8.5-7 10-3.6-1.5-7-5-7-10V6l7-4z",
+                },
+                {
+                  label: "100% Genuine",
+                  d: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                },
+              ].map((b) => (
+                <div key={b.label} className="flex flex-col items-center text-center gap-1">
+                  <span className="flex items-center justify-center w-9 h-9 rounded-full bg-orange-50 text-[#EB8105]">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.8}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d={b.d} />
+                    </svg>
+                  </span>
+                  <span className="text-[11px] text-[#7C7C7C] font-medium">
+                    {b.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

@@ -34,18 +34,39 @@ export class LoginAuthController {
     const { mobileNumber, otp } = req.body;
     try {
       const result = await authService.verifyOTP(mobileNumber, otp);
-      if (result.success) {
-        const user = await User.findOne({
-          phone_number: mobileNumber
-        }).exec();
-        if (!user) {
-          res.status(400).json({ Login: "Unsuccessful", error: "User not found" });
-        }
-        const token = generateToken(req, res, next, user);
-        res.json({ message: "OTP verified successfully", result: { UserData: user }, token });
-      } else {
+      if (!result.success) {
         res.status(400).json({ message: "Invalid OTP" });
+        return;
       }
+
+      // Look up an existing customer by phone number.
+      let user = await User.findOne({ phone_number: mobileNumber }).exec();
+      let isNewUser = false;
+
+      // If the number isn't registered yet, auto-create a minimal account and
+      // log them in — same zero-friction signup as most e-commerce apps.
+      if (!user) {
+        const digits = mobileNumber.replace(/\D/g, ""); // strip +91 etc.
+        const last4 = digits.slice(-4);
+        // Synthetic unique email to satisfy the required/unique email field.
+        // The user can set a real name/email later from their profile.
+        const syntheticEmail = `${digits}@phone.trialshopy.in`;
+
+        user = await User.create({
+          phone_number: mobileNumber,
+          name: `User ${last4}`,
+          email: syntheticEmail,
+        });
+        isNewUser = true;
+      }
+
+      const token = generateToken(req, res, next, user);
+      res.json({
+        message: "OTP verified successfully",
+        result: { UserData: user },
+        isNewUser,
+        token,
+      });
     } catch (error) {
       res.status(500).json({ message: "Failed to verify OTP" });
     }

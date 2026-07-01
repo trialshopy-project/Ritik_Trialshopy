@@ -6,11 +6,50 @@ import Store from "../models/store.model";
 import mongoose from "mongoose";
 import { FilterQuery } from "mongoose";
 import { getAllCategoryIds } from "../helpers/getCategoryChild";
+import { db } from "../config/database.config";
+
+const CATEGORY_CACHE_TTL = 1800; // 30 minutes in seconds
+
+/**
+ * Build a deterministic Redis cache key for a category product listing.
+ */
+function buildCategoryCacheKey(categories: string[], page: number): string {
+  const sortedIds = [...categories].map(String).sort().join(",");
+  return `products:category:${sortedIds}:page:${page}`;
+}
+
+/**
+ * Invalidate all Redis cache keys that match the given category IDs.
+ * Uses a SCAN-based approach so it never blocks the event loop.
+ */
+async function invalidateCategoryCache(categoryIds: string[]): Promise<void> {
+  try {
+    const patterns = categoryIds.map((id) => `products:category:*${id}*`);
+    for (const pattern of patterns) {
+      let cursor = "0";
+      do {
+        const [nextCursor, keys] = await db.scan(cursor, "MATCH", pattern, "COUNT", 100);
+        cursor = nextCursor;
+        if (keys.length > 0) {
+          await db.del(...keys);
+        }
+      } while (cursor !== "0");
+    }
+  } catch (err) {
+    // Cache invalidation errors are non-fatal — log and continue
+    console.error("[Redis] Cache invalidation error:", err);
+  }
+}
 
 export class ProductService {
   async create(data: IProduct): Promise<IProduct> {
     const product = new Product(data);
-    return product.save();
+    const saved = await product.save();
+    // Invalidate category caches for the newly created product's categories
+    if (data.categories && data.categories.length > 0) {
+      invalidateCategoryCache(data.categories.map(String));
+    }
+    return saved;
   }
   //
   async getAll(sortBy: string, filters: Record<string, any>, limit: number, page: number): Promise<IProduct[] | null> {
@@ -33,10 +72,20 @@ export class ProductService {
 
   async getAll2(sortBy: string, filters: Record<string, any>, limit: number, page: number): Promise<IProduct[] | null> {
     const allCategoryIds = await getAllCategoryIds(filters.categories);
-
     const flatCategoryIds = allCategoryIds.flat();
 
-    // console.log("categoryIds", flatCategoryIds);
+    // Build a deterministic Redis key for this request
+    const cacheKey = buildCategoryCacheKey(flatCategoryIds.map(String), page);
+
+    try {
+      const cached = await db.get(cacheKey);
+      if (cached) {
+        console.log(`[Redis] Cache HIT: ${cacheKey}`);
+        return JSON.parse(cached) as IProduct[];
+      }
+    } catch (err) {
+      console.error("[Redis] Cache read error:", err);
+    }
 
     const query = {
       ...filters,
@@ -50,6 +99,11 @@ export class ProductService {
       .sort(sortBy)
       .lean()
       .exec();
+
+    // Store result in Redis cache (fire-and-forget, non-blocking)
+    db.set(cacheKey, JSON.stringify(products), "EX", CATEGORY_CACHE_TTL).catch((err) =>
+      console.error("[Redis] Cache write error:", err)
+    );
 
     return products as IProduct[];
   }
@@ -90,11 +144,20 @@ export class ProductService {
   }
 
   async update(storeId: string, sellerId: string, productId: string, data: IProductUpdate): Promise<IProduct | null> {
-    return await Product.findOneAndUpdate({ storeId: storeId, _id: productId }, data, { new: true }).exec();
+    const updated = await Product.findOneAndUpdate({ storeId: storeId, _id: productId }, data, { new: true }).exec();
+    // Invalidate cache for every category this product belongs to
+    if (updated?.categories && updated.categories.length > 0) {
+      invalidateCategoryCache(updated.categories.map(String));
+    }
+    return updated;
   }
 
   async delete(storeId: string, sellerId: string, productId: string): Promise<void> {
-    return await Product.findOneAndUpdate({ storeId: storeId, _id: productId, $set: { status: "inactive" } }, { new: true }).exec();
+    const deleted = await Product.findOneAndUpdate({ storeId: storeId, _id: productId }, { $set: { status: "inactive" } }, { new: false }).exec();
+    // Invalidate cache for every category the deleted product belonged to
+    if (deleted?.categories && deleted.categories.length > 0) {
+      invalidateCategoryCache(deleted.categories.map(String));
+    }
   }
 
   async revoke(productId: string): Promise<void> {

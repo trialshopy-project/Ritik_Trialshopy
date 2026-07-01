@@ -7,7 +7,7 @@ import LoginwithPwd from "./LoginwithPwd";
 import OTPpage from "./OTPpage";
 
 const LoginPage = () => {
-  const [loginMethod, setLoginMethod] = useState("pwd");
+  const [loginMethod, setLoginMethod] = useState("otp");
   const [isOTP, setIsOtp] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
 
@@ -63,57 +63,19 @@ const LoginPage = () => {
                 )}
               </div>
 
-              <div className="w-full my-2">
-                <p className="mb-1 mr-2 text-sm font-semibold text-center text-gray-800">
-                  New to Trialshopy?
-                  <Link
-                    href={"/account/register"}
-                    className="mb-2 mx-4 text-base font-semibold text-orange-400 hover:font-fontBold"
-                  >
-                    Sign Up
-                  </Link>
-                </p>
-              </div>
-              {/* <div className="flex flex-row items-center justify-center">
-                <div className="mr-2">
-                  <hr className="sm:w-[198px] w-[130px] ml-[5px] mt-4 h-px border-1 border-gray-500"></hr>
+              {loginMethod === "pwd" && (
+                <div className="w-full my-2">
+                  <p className="mb-1 mr-2 text-sm font-semibold text-center text-gray-800">
+                    New to Trialshopy?
+                    <Link
+                      href={"/account/register"}
+                      className="mb-2 mx-4 text-base font-semibold text-orange-400 hover:font-fontBold"
+                    >
+                      Sign Up
+                    </Link>
+                  </p>
                 </div>
-                <div className="mt-2 mr-2">
-                  <span className="mt-6 text-[14px] text-gray-500">OR</span>
-                </div>
-                <div>
-                  <hr className="sm:w-[198px] w-[130px] ml-[5px] mt-4 border-1 border-gray-500"></hr>
-                </div>
-              </div> */}
-              {/* <div className="flex flex-row items-center justify-center gap-10 mt-4 mb-4">
-                <button>
-                  <Image
-                    alt="google"
-                    height={20}
-                    width={20}
-                    className="h-[30px] w-[31px]"
-                    src="/images/google.svg"
-                  ></Image>
-                </button>
-                <button>
-                  <Image
-                    alt="apple"
-                    height={20}
-                    width={20}
-                    className="h-[35px] w-[35px]"
-                    src="/images/apple.svg"
-                  ></Image>
-                </button>
-                <button>
-                  <Image
-                    alt="fb_facebook"
-                    height={20}
-                    width={20}
-                    className="h-[35px] w-[35px]"
-                    src="/images/fb_facebook.svg"
-                  ></Image>
-                </button>
-              </div> */}
+              )}
             </>
           )}
           <div className="flex flex-row justify-center mb-1">

@@ -49,19 +49,26 @@ const OrderDetails = ({ data }) => {
   };
 
   const handleReturn = async (orderId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to return this item? Our team will pick it up from your address."
+    );
+    if (!confirmed) return;
+
     await axios
       .put(`${serverURL}/api/v1/updateSubOrder/${orderId}`, {
         status: "return",
       })
       .then((response) => {
         console.log(`Products data for category ${orderId}:`, response.data);
-        alert(`SubOrder Id: ${orderId} Updated successfully!`);
+        alert("Return request placed successfully. We'll be in touch shortly.");
+        router.refresh();
       })
       .catch((error) => {
         console.error(
-          `Error fetching products for category ${orderId}:`,
+          `Error placing return for order ${orderId}:`,
           error
         );
+        alert("Could not place the return request. Please try again.");
       });
   };
   return (
@@ -105,6 +112,17 @@ const OrderDetails = ({ data }) => {
                 .pop() || 0;
 
             const currentStep = currentStepIndex >= 0 ? currentStepIndex : 0;
+
+            // Return is only allowed once the item has actually been delivered
+            // (matches how other e-commerce platforms behave), and while the
+            // return window is still open.
+            const isDelivered = Boolean(statusMap["delivered"]);
+            const isReturned = item.status === "return";
+            const returnWindowOpen =
+              !data?.exchangeReturnWindowClosedOn ||
+              new Date(data.exchangeReturnWindowClosedOn) >= new Date();
+            const canReturn = isDelivered && !isReturned && returnWindowOpen;
+
             return (
               <div key={index} className="py-4">
                 <div className="flex flex-row">
@@ -146,8 +164,7 @@ const OrderDetails = ({ data }) => {
                       </h1>
                     </span>
                   </div>
-                  <div className="items-center hidden mx-4 md:grid md:w-1/2 py-auto ">
-                    {/* <Link href={`/product/${productData.id}`}> */}
+                  <div className="items-end hidden mx-4 md:flex md:flex-col md:justify-center gap-3 md:w-1/2 py-auto ">
                     <Link
                       href={`/products/details?productId=${item?.productId?._id}`}
                     >
@@ -156,13 +173,27 @@ const OrderDetails = ({ data }) => {
                         <MdArrowForwardIos className="mx-1" />
                       </p>
                     </Link>
-                    {item.status !== "return" && (
+
+                    {/* Return — only after the item is delivered */}
+                    {isReturned ? (
+                      <span className="w-fit flex flex-row items-center border border-red-300 bg-red-50 text-red-600 px-4 py-2 rounded-md">
+                        Return Requested
+                        <TbTruckReturn className="mx-1" />
+                      </span>
+                    ) : canReturn ? (
                       <button onClick={() => handleReturn(item?._id)}>
-                        <p className="w-fit flex flex-row items-center bg-gradient-to-b from-primary to-secondary px-4 py-2 rounded-md ml-auto">
+                        <p className="w-fit flex flex-row items-center border border-primary text-primary hover:bg-primary hover:text-white transition-colors px-4 py-2 rounded-md ml-auto">
                           Return
                           <TbTruckReturn className="mx-1" />
                         </p>
                       </button>
+                    ) : (
+                      <span className="w-fit flex flex-row items-center text-[#7C7C7C] text-[13px]">
+                        <TbTruckReturn className="mx-1" />
+                        {returnWindowOpen
+                          ? "Return available after delivery"
+                          : "Return window closed"}
+                      </span>
                     )}
                   </div>
                 </div>

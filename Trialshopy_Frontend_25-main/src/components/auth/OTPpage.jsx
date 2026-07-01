@@ -43,7 +43,6 @@ const OTPpage = ({ setIsOtp, mobileNumber }) => {
       });
       if (response.data.message === "OTP verified successfully") {
         const userData = response.data;
-        console.log(userData);
 
         setAuthenticated({
           user: userData?.result?.UserData,
@@ -56,24 +55,33 @@ const OTPpage = ({ setIsOtp, mobileNumber }) => {
         setVerificationMessage("Invalid OTP");
       }
     } catch (error) {
-      setVerificationMessage(error?.response?.data?.message);
+      setVerificationMessage(error?.response?.data?.message || "Failed to verify OTP");
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (timeInSeconds > 0) return;
+    try {
+      await axios.post(`${serverURL}/api/v1/send-otp`, { mobileNumber });
+      setVerificationMessage("");
+      setTimeInSeconds(120);
+    } catch (error) {
+      setVerificationMessage(
+        error?.response?.data?.message || "Failed to resend OTP"
+      );
     }
   };
 
   const [timeInSeconds, setTimeInSeconds] = useState(120);
 
   useEffect(() => {
+    if (timeInSeconds <= 0) return;
     const interval = setInterval(() => {
-      if (timeInSeconds <= 0) {
-        clearInterval(interval);
-        setIsOtp(false);
-      } else {
-        setTimeInSeconds((prevTime) => prevTime - 1);
-      }
+      setTimeInSeconds((prevTime) => (prevTime <= 0 ? 0 : prevTime - 1));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeInSeconds, router, setIsOtp]);
+  }, [timeInSeconds]);
 
   const minutes = Math.floor(timeInSeconds / 60);
   const seconds = timeInSeconds % 60;
@@ -90,7 +98,6 @@ const OTPpage = ({ setIsOtp, mobileNumber }) => {
               An OTP has been
             </p>
             <p className="flex-wrap text-xs mb-2 text-center text-gray-500">
-              {/* Sent to +917373047323 */}
               Sent to {mobileNumber}
             </p>
           </div>
@@ -101,6 +108,7 @@ const OTPpage = ({ setIsOtp, mobileNumber }) => {
                 key={index}
                 ref={ref}
                 type="text"
+                inputMode="numeric"
                 maxLength={1}
                 className="w-12 h-12 py-1 border border-gray-400 rounded-md text-center"
                 onChange={(event) => handleInputChange(index, event)}
@@ -125,9 +133,15 @@ const OTPpage = ({ setIsOtp, mobileNumber }) => {
 
         <div className="w-full mt-5">
           <p className="text-[14px] mb-1 text-center text-gray-400 font-normal">
-            Resend OTP in
-            <button className="font-semibold hover:font-fontBold text-[16px] mb-2 ml-1 text-black">
-              {formattedTime}
+            {timeInSeconds > 0 ? "Resend OTP in" : "Didn't get the code?"}
+            <button
+              onClick={handleResendOTP}
+              disabled={timeInSeconds > 0}
+              className={`font-semibold hover:font-fontBold text-[16px] mb-2 ml-1 ${
+                timeInSeconds > 0 ? "text-black" : "text-orange-400"
+              }`}
+            >
+              {timeInSeconds > 0 ? formattedTime : "Resend OTP"}
             </button>
           </p>
         </div>

@@ -118,6 +118,7 @@ export const productDetails = new Schema({
 });
 
 productDetails.index({ productName: "text", shortDescription: "text" });
-
+productDetails.index({ category: 1, status: 1 });
+productDetails.index({ categories: 1, status: 1 });
 const Product: Model<any> = model<any>("product", productDetails);
 export default Product;
