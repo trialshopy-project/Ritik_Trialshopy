@@ -5,17 +5,23 @@ import FilterSub from "@/components/pages/category/FilterSub";
 
 async function fetchBlog(id) {
   try {
-    const res = await axios.post(
+    const res = await fetch(
       `${process.env.NEXT_PUBLIC_BASE_API_URL}/api/v1/products`,
       {
-        filters: {
-          categories: [id],
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          filters: {
+            categories: [id],
+          },
+        }),
+        next: { revalidate: 60 },
       }
     );
-
-    const response = res.data.data;
-    return response;
+    const data = await res.json();
+    return data.data;
   } catch (err) {
     console.error(err);
   }
